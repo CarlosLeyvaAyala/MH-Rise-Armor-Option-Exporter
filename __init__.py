@@ -1,7 +1,8 @@
 from datetime import datetime
 import os
 import bpy
-from fileinput import filename
+import re
+# from fileinput import filename
 
 bl_info = {
     "name": "",
@@ -59,7 +60,42 @@ def includeCollectionName(baseDir, collectionName):
     return os.path.join(baseDir, collectionName)
 
 
-def processItems(collection, baseDir, fileName, getFullPath=includeCollectionName):
+def getFilesFromCollectionName(collectionName, requestedFilename):
+    """Gets file names from the collection name."""
+    names = collectionName.split("|")
+    return {
+        "dirName": names[0],
+        "fileName": meshFileName(names[1]) if len(names) > 1 else requestedFilename,
+    }
+
+
+def getFilesForQuickTest(collectionName, requestedFilename):
+    """Converts collection name from "dir|file" to something that can be exported."""
+    names = collectionName.split("|")
+    if len(names) > 1:
+        fName = names[1]
+        dirName = "pl" + re.search("\d+$", fName).group()
+        return {
+            "dirName": dirName,
+            "fileName": meshFileName(fName),
+        }
+    else:
+        return {
+            "dirName": "",
+            "fileName": requestedFilename,
+        }
+
+
+def doExport(filePath):
+    bpy.ops.re_mesh_noesis.exportfile(
+        filepath=filePath, selection_only=True, check_existing=False)
+
+
+def testExport(filePath):
+    print("Exporting ", filePath)
+
+
+def processItems(collection, baseDir, fileName, getFullPath=includeCollectionName, getFileName=getFilesFromCollectionName):
     if collection.name[:2] == "__" or collection.name == "Collection":
         print("Skipping \"", collection.name, "\"")
         return
@@ -67,14 +103,15 @@ def processItems(collection, baseDir, fileName, getFullPath=includeCollectionNam
     if len(collection.objects) < 1:
         return
 
-    path = getFullPath(baseDir, collection.name)
+    output = getFileName(collection.name, fileName)
+    path = getFullPath(baseDir, output["dirName"])
     os.makedirs(path, exist_ok=True)
 
-    fn = os.path.join(path, fileName)
+    fn = os.path.join(path, output["fileName"])
 
     setSelected(collection, True)
-    bpy.ops.re_mesh_noesis.exportfile(
-        filepath=fn, selection_only=True, check_existing=False)
+    doExport(fn)
+    # testExport(fn)
     setSelected(collection, False)
 
 
@@ -133,9 +170,9 @@ def export(context, getOptionsFunc, exportFunc):
     return fff
 
 
-def exportSelected(obj, context, getOptionsFunc, getFullPath=includeCollectionName):
+def exportSelected(obj, context, getOptionsFunc, getFullPath=includeCollectionName, getFileName=getFilesFromCollectionName):
     e = export(context, getOptionsFunc,
-               lambda outDir, fn: processItems(bpy.context.collection, outDir, fn, getFullPath))
+               lambda outDir, fn: processItems(bpy.context.collection, outDir, fn, getFullPath, getFileName))
     reportExportSingle(obj, e)
     showOnlyCurrentCollection()
 
@@ -177,7 +214,9 @@ class ARMOROPTIONEXPORTER_OT_exportquick(bpy.types.Operator):
     bl_idname = "armoroptionexporter.exportquick"
 
     def execute(self, context):
-        exportSelected(self, context, getTestOptions, lambda path, _: path)
+        exportSelected(self, context, getTestOptions,
+
+                       getFileName=getFilesForQuickTest)
 
         return {'FINISHED'}
 
