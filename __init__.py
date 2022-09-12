@@ -7,7 +7,7 @@ import re
 bl_info = {
     "name": "",
     "author": "Carlos Leyva",
-    "version": (1, 0),
+    "version": (1, 1, 1),
     "blender": (2, 93, 0),
     "location": "File > Import-Export",
     "description": "Exports collections as armor options for MH Rise by using RE Mesh Noesis Wrapper.",
@@ -41,7 +41,7 @@ def hideArmatures(objs):
     forAllObjects(f, objs)
 
 
-def showOnlyCurrentCollection(willHideArmatures=True):
+def showOnlyCurrentCollection(willHideArmatures=False):
     selection = bpy.context.collection.objects
 
     hideAll()
