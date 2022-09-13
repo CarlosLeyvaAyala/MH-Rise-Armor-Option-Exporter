@@ -242,6 +242,17 @@ class ARMOROPTIONEXPORTER_OT_hidecurrcollection(bpy.types.Operator):
         return {'FINISHED'}
 
 
+class ARMOROPTIONEXPORTER_OT_showcurrcollection(bpy.types.Operator):
+    """Shows the current selected collection"""
+    bl_label = "Show current collection"
+    bl_idname = "armoroptionexporter.showcurrcollection"
+
+    def execute(self, _):
+        forAllObjects(unhideObject, bpy.context.collection.objects)
+
+        return {'FINISHED'}
+
+
 class ExportProperties(bpy.types.PropertyGroup):
     filename: bpy.props.StringProperty(
         name="File name", default="f_bodyXXX", description="Generated file name. Appending \".mesh.2109148288\" is not needed")
@@ -287,6 +298,8 @@ class ARMOROPTIONEXPORTER_PT_exportPnl(bpy.types.Panel):
         row.operator("armoroptionexporter.showonlycurrcollection")
         row = lyt.row()
         row.operator("armoroptionexporter.hidecurrcollection")
+        row = lyt.row()
+        row.operator("armoroptionexporter.showcurrcollection")
 
 
 classes = (
@@ -297,6 +310,7 @@ classes = (
     ARMOROPTIONEXPORTER_OT_exportall,
     ARMOROPTIONEXPORTER_OT_showonlycurrcollection,
     ARMOROPTIONEXPORTER_OT_hidecurrcollection,
+    ARMOROPTIONEXPORTER_OT_showcurrcollection,
 )
 
 
