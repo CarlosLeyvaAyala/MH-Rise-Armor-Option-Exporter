@@ -253,6 +253,19 @@ class ARMOROPTIONEXPORTER_OT_showcurrcollection(bpy.types.Operator):
         return {'FINISHED'}
 
 
+class ARMOROPTIONEXPORTER_OT_unhideallcollections(bpy.types.Operator):
+    """Unhides all collections, but not their contents. Collections must be unhidden for this plugin to properly work"""
+    bl_label = "Unhide all collections"
+    bl_idname = "armoroptionexporter.unhideallcollections"
+
+    def execute(self, _):
+        def hhh(c):
+            c.hide_viewport = False
+        forAllObjects(hhh, bpy.context.view_layer.layer_collection.children)
+
+        return {'FINISHED'}
+
+
 class ExportProperties(bpy.types.PropertyGroup):
     filename: bpy.props.StringProperty(
         name="File name", default="f_bodyXXX", description="Generated file name. Appending \".mesh.2109148288\" is not needed")
@@ -296,10 +309,14 @@ class ARMOROPTIONEXPORTER_PT_exportPnl(bpy.types.Panel):
         row.label(text="Visibility", icon='HIDE_OFF')
         row = lyt.row()
         row.operator("armoroptionexporter.showonlycurrcollection")
+        lyt.separator(factor=0.3)
         row = lyt.row()
         row.operator("armoroptionexporter.hidecurrcollection")
         row = lyt.row()
         row.operator("armoroptionexporter.showcurrcollection")
+        lyt.separator(factor=0.3)
+        row = lyt.row()
+        row.operator("armoroptionexporter.unhideallcollections")
 
 
 classes = (
@@ -311,6 +328,7 @@ classes = (
     ARMOROPTIONEXPORTER_OT_showonlycurrcollection,
     ARMOROPTIONEXPORTER_OT_hidecurrcollection,
     ARMOROPTIONEXPORTER_OT_showcurrcollection,
+    ARMOROPTIONEXPORTER_OT_unhideallcollections,
 )
 
 
